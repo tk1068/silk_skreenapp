@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, send_file, redirect, url_for
 from PIL import Image, ImageOps
 import os
-import io
 
 app = Flask(__name__)
 
@@ -23,6 +22,7 @@ def convert():
     width_mm = request.form.get('width', type=float)
     height_mm = request.form.get('height', type=float)
     dpi = request.form.get('dpi', type=int, default=300)
+    trim = request.form.get('trim') == 'on'  # 余白カットの有無
 
     image = Image.open(image_file.stream).convert('L')  # グレースケール化
 
@@ -46,11 +46,16 @@ def convert():
     elif mode == 'halftone':
         image = image.convert('1', dither=Image.FLOYDSTEINBERG)
 
-    # 処理後画像保存（DPIを指定）
-    result_path = os.path.join(STATIC_FOLDER, 'output.png')
-    image.save(result_path, dpi=(dpi, dpi))  # ← ここでDPIを指定
+    # 余白自動トリミング
+    if trim:
+        bbox = image.getbbox()
+        if bbox:
+            image = image.crop(bbox)
 
-    # 変換後プレビュー表示ページへ遷移
+    # 処理後画像保存
+    result_path = os.path.join(STATIC_FOLDER, 'output.png')
+    image.save(result_path)
+
     return redirect(url_for('result'))
 
 @app.route('/result')
@@ -58,6 +63,5 @@ def result():
     return render_template('result.html', result_url=url_for('static', filename='output.png'))
 
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
