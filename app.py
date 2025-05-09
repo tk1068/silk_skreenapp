@@ -46,9 +46,9 @@ def convert():
     elif mode == 'halftone':
         image = image.convert('1', dither=Image.FLOYDSTEINBERG)
 
-    # 処理後画像保存（staticフォルダへ）
+    # 処理後画像保存（DPIを指定）
     result_path = os.path.join(STATIC_FOLDER, 'output.png')
-    image.save(result_path)
+    image.save(result_path, dpi=(dpi, dpi))  # ← ここでDPIを指定
 
     # 変換後プレビュー表示ページへ遷移
     return redirect(url_for('result'))
