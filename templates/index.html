@@ -100,6 +100,10 @@
           <input type="file" name="image" id="image" required>
         </label>
 
+        <label>
+            <input type="checkbox" name="trim"> 余白をカットする
+        </label>
+
         <label>幅 (mm):
             <input type="number" name="width" step="0.1" placeholder="例: 100">
         </label>
@@ -119,10 +123,6 @@
                 <option value="halftone">ハーフトーン</option>
             </select>
         </label>
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="trim" id="trim">
-            <label class="form-check-label" for="trim">余白（白/透明）を自動カットする</label>
-        </div>
 
 
         <button type="submit">変換してダウンロード</button>

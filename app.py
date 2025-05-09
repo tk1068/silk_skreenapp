@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, send_file, redirect, url_for
-from PIL import Image, ImageOps
+from PIL import Image
 import os
 
 app = Flask(__name__)
@@ -22,11 +22,17 @@ def convert():
     width_mm = request.form.get('width', type=float)
     height_mm = request.form.get('height', type=float)
     dpi = request.form.get('dpi', type=int, default=300)
-    trim = request.form.get('trim') == 'on'  # 余白カットの有無
+    trim = request.form.get('trim') == 'on'
 
     image = Image.open(image_file.stream).convert('L')  # グレースケール化
 
-    # サイズ調整
+    # 余白自動トリミング
+    if trim:
+        bbox = image.getbbox()
+        if bbox:
+            image = image.crop(bbox)
+
+    # サイズ調整（トリミング後）
     if width_mm or height_mm:
         orig_w, orig_h = image.size
         if width_mm and not height_mm:
@@ -46,13 +52,7 @@ def convert():
     elif mode == 'halftone':
         image = image.convert('1', dither=Image.FLOYDSTEINBERG)
 
-    # 余白自動トリミング
-    if trim:
-        bbox = image.getbbox()
-        if bbox:
-            image = image.crop(bbox)
-
-    # 処理後画像保存
+    # 保存
     result_path = os.path.join(STATIC_FOLDER, 'output.png')
     image.save(result_path)
 
