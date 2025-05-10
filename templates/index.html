@@ -3,29 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <title>画像変換アプリ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        img.preview {
-            max-width: 300px;
-            max-height: 300px;
-            margin-top: 10px;
+        body {
+            font-family: 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            margin-top: 40px;
+            font-size: 1.8em;
+            color: #333;
+        }
+
+        form {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 40px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        input[type="file"],
+        input[type="number"],
+        input[type="checkbox"],
+        input[type="radio"] {
+            margin-top: 5px;
+        }
+
+        input[type="number"],
+        input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
             border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .radio-group {
+            margin-top: 10px;
+        }
+
+        .radio-group label {
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        button {
+            margin-top: 25px;
+            width: 100%;
+            background: #007BFF;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        img.preview {
+            display: block;
+            margin: 20px auto 0 auto;
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 6px;
         }
     </style>
 </head>
 <body>
     <h1>画像変換アプリ</h1>
     <form action="/convert" method="post" enctype="multipart/form-data">
-        <label>画像を選択：<input type="file" name="image" accept="image/*" onchange="previewImage(event)" required></label><br>
-        <img id="preview" class="preview" src="#" alt="プレビュー画像" style="display: none;"><br><br>
+        <label>画像を選択：
+            <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required>
+        </label>
 
-        <label><input type="checkbox" name="trim"> 余白トリミング</label><br>
-        <label>DPI: <input type="number" name="dpi" value="300" required></label><br>
-        <label>幅（mm）: <input type="number" name="width" step="0.1"></label><br>
-        <label>高さ（mm）: <input type="number" name="height" step="0.1"></label><br>
+        <img id="preview" class="preview" src="#" alt="プレビュー画像" style="display: none;">
 
-        <label>処理モード:</label><br>
-        <label><input type="radio" name="mode" value="binary" checked> バイナリ</label><br>
-        <label><input type="radio" name="mode" value="halftone"> ハーフトーン</label><br><br>
+        <label>
+            <input type="checkbox" name="trim"> 余白を自動トリミング
+        </label>
+
+        <label>DPI（解像度）:
+            <input type="number" name="dpi" value="300" required>
+        </label>
+
+        <label>幅（mm）:
+            <input type="number" name="width" step="0.1">
+        </label>
+
+        <label>高さ（mm）:
+            <input type="number" name="height" step="0.1">
+        </label>
+
+        <div class="radio-group">
+            <span>処理モード:</span><br>
+            <label><input type="radio" name="mode" value="binary" checked> バイナリ</label>
+            <label><input type="radio" name="mode" value="halftone"> ハーフトーン</label>
+        </div>
 
         <button type="submit">変換する</button>
     </form>
