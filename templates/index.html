@@ -2,149 +2,44 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>シルクスクリーン製版画像変換</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+    <title>画像変換アプリ</title>
     <style>
-        body {
-            font-family: 'Noto Sans JP', sans-serif;
-            background-color: #f9f9f9;
-            color: #333;
-            padding: 2em;
-            max-width: 700px;
-            margin: auto;
-        }
-        h1 {
-            font-size: 1.8em;
-            margin-bottom: 1em;
-            text-align: center;
-        }
-        form {
-            background: white;
-            padding: 2em;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.05);
-        }
-        label {
-            display: block;
-            margin-top: 1em;
-        }
-        input[type="file"],
-        input[type="number"],
-        select {
-            width: 100%;
-            padding: 0.6em;
-            margin-top: 0.4em;
+        img.preview {
+            max-width: 300px;
+            max-height: 300px;
+            margin-top: 10px;
             border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
         }
-        button {
-            background: #333;
-            color: white;
-            padding: 0.8em 1.2em;
-            margin-top: 1.5em;
-            border: none;
-            border-radius: 6px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background: #555;
-        }
-        .preview {
-            margin-top: 2em;
-            text-align: center;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-        .upload-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 2px dashed #aaa;
-            border-radius: 12px;
-            padding: 2em;
-            margin: 1em auto;
-            background: #f9f9f9;
-            color: #333;
-            font-size: 1.1em;
-            cursor: pointer;
-            width: 80%;
-            max-width: 400px;
-            transition: border 0.3s ease, background 0.3s ease;
-            }
-
-            .upload-box:hover {
-            border-color: #333;
-            background: #f0f0f0;
-            }
-
-            .upload-box input[type="file"] {
-            display: none;
-            }
-
     </style>
 </head>
 <body>
-    <h1>シルクスクリーン製版用 画像変換ツール</h1>
+    <h1>画像変換アプリ</h1>
+    <form action="/convert" method="post" enctype="multipart/form-data">
+        <label>画像を選択：<input type="file" name="image" accept="image/*" onchange="previewImage(event)" required></label><br>
+        <img id="preview" class="preview" src="#" alt="プレビュー画像" style="display: none;"><br><br>
 
-    <form method="POST" action="/convert" enctype="multipart/form-data">
-        <label for="image" class="upload-box">
-          <span>📂 ここをクリックして画像を選択</span>
-          <input type="file" name="image" id="image" required>
-        </label>
+        <label><input type="checkbox" name="trim"> 余白トリミング</label><br>
+        <label>DPI: <input type="number" name="dpi" value="300" required></label><br>
+        <label>幅（mm）: <input type="number" name="width" step="0.1"></label><br>
+        <label>高さ（mm）: <input type="number" name="height" step="0.1"></label><br>
 
-        <label>
-            <input type="checkbox" name="trim"> 余白をカットする
-        </label>
+        <label>処理モード:</label><br>
+        <label><input type="radio" name="mode" value="binary" checked> バイナリ</label><br>
+        <label><input type="radio" name="mode" value="halftone"> ハーフトーン</label><br><br>
 
-        <label>幅 (mm):
-            <input type="number" name="width" step="0.1" placeholder="例: 100">
-        </label>
-
-        <label>高さ (mm):
-            <input type="number" name="height" step="0.1" placeholder="例: 150">
-        </label>
-
-        <label>DPI:
-            <input type="number" name="dpi" value="300" required>
-        </label>
-
-        <label>変換モード:
-            <select name="mode">
-                <option value="none">グレースケール</option>
-                <option value="binary">2値化</option>
-                <option value="halftone">ハーフトーン</option>
-            </select>
-        </label>
-
-
-        <button type="submit">変換してダウンロード</button>
+        <button type="submit">変換する</button>
     </form>
-
-    <div class="preview">
-        <h3>処理前プレビュー</h3>
-        <img id="preview" src="#" alt="プレビュー画像" style="display: none;">
-    </div>
 
     <script>
         function previewImage(event) {
             const input = event.target;
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const preview = document.getElementById('preview');
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
+            const preview = document.getElementById('preview');
+            const reader = new FileReader();
+            reader.onload = function(){
+                preview.src = reader.result;
+                preview.style.display = "block";
+            };
+            reader.readAsDataURL(input.files[0]);
         }
     </script>
 </body>

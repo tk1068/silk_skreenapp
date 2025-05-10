@@ -1,14 +1,10 @@
-from flask import Flask, render_template, request, send_file, redirect, url_for
-from PIL import Image
+from flask import Flask, render_template, request, redirect, url_for
+from PIL import Image, ImageChops
 import os
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = 'uploads'
-RESULT_FOLDER = 'results'
 STATIC_FOLDER = 'static'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(RESULT_FOLDER, exist_ok=True)
 os.makedirs(STATIC_FOLDER, exist_ok=True)
 
 @app.route('/')
@@ -26,13 +22,16 @@ def convert():
 
     image = Image.open(image_file.stream).convert('L')  # グレースケール化
 
-    # 余白自動トリミング
+    # 余白トリミング（白に近い部分）
     if trim:
-        bbox = image.getbbox()
+        bg = Image.new('L', image.size, 255)
+        diff = ImageChops.difference(image, bg)
+        diff = Image.eval(diff, lambda x: 0 if x < 10 else 255)
+        bbox = diff.getbbox()
         if bbox:
             image = image.crop(bbox)
 
-    # サイズ調整（トリミング後）
+    # サイズ調整
     if width_mm or height_mm:
         orig_w, orig_h = image.size
         if width_mm and not height_mm:
