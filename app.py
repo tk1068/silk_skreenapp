@@ -22,6 +22,14 @@ def convert():
 
     image = Image.open(image_file.stream).convert('L')  # グレースケール化
 
+        # 処理モード
+    if mode == 'binary':
+        image = image.point(lambda x: 255 if x > 128 else 0, '1')
+    elif mode == 'halftone':
+        image = image.convert('1', dither=Image.FLOYDSTEINBERG)
+    elif mode == 'grayscale':
+        pass  # 何もしない（すでに .convert('L') でグレースケール化済み）
+
     # 余白トリミング（白に近い部分）
     if trim:
         bg = Image.new('L', image.size, 255)
@@ -53,14 +61,6 @@ def convert():
 
         # リサイズを行う
         image = image.resize((width_px, height_px), Image.LANCZOS)
-
-    # 処理モード
-    if mode == 'binary':
-        image = image.point(lambda x: 255 if x > 128 else 0, '1')
-    elif mode == 'halftone':
-        image = image.convert('1', dither=Image.FLOYDSTEINBERG)
-    elif mode == 'grayscale':
-        pass  # 何もしない（すでに .convert('L') でグレースケール化済み）
 
 
     # 保存（300dpiで固定）
