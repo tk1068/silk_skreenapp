@@ -1,0 +1,11 @@
+2. Git に変更を追加
+bash
+コピーする
+編集する
+git add .
+git commit -m "Fix layout / Update processing"
+3. GitHub にプッシュ
+bash
+コピーする
+編集する
+git push origin main

@@ -103,23 +103,23 @@
             <input type="checkbox" name="trim"> 余白を自動トリミング
         </label>
 
-        <label>DPI（解像度）:
-            <input type="number" name="dpi" value="300" required>
-        </label>
+        <h3>サイズを指定（mm単位）</h3>
+        <div style="display: flex; gap: 1em; align-items: center; flex-wrap: wrap;">
+            <label for="width">幅(mm):</label>
+            <input type="number" id="width" name="width" step="0.1" style="width: 100px;">
 
-        <label>幅（mm）:
-            <input type="number" name="width" step="0.1">
-        </label>
-
-        <label>高さ（mm）:
-            <input type="number" name="height" step="0.1">
-        </label>
-
-        <div class="radio-group">
-            <span>処理モード:</span><br>
-            <label><input type="radio" name="mode" value="binary" checked> バイナリ</label>
-            <label><input type="radio" name="mode" value="halftone"> ハーフトーン</label>
+            <label for="height">高さ(mm):</label>
+            <input type="number" id="height" name="height" step="0.1" style="width: 100px;">
         </div>
+
+
+        <h3>カラーモードを選択</h3>
+        <select name="mode">
+            <option value="grayscale">グレースケール</option>
+            <option value="binary">モノクロ（2階調）</option>
+            <option value="halftone">ハーフトーン</option>
+        </select>
+
 
         <button type="submit">変換する</button>
     </form>
