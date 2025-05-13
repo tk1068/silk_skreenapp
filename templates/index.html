@@ -99,25 +99,44 @@
     .rotate-buttons button:hover {
       background: #ddd;
     }
+
+    .help-icon {
+        display: inline-block;
+        margin-left: 6px;
+        cursor: help;
+        font-weight: bold;
+        border-radius: 50%;
+        padding: 0 6px;
+        background: #ddd;
+        color: #333;
+        font-size: 0.9em;
+    }
+
   </style>
 </head>
 <body>
   <h1>SURIMACCA製版データ作成ツール</h1>
   <form action="/convert" method="post" enctype="multipart/form-data">
-    <label>画像を選択：
-      <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required>
+   <label>画像を選択：
+    <span class="help-icon" title="印刷したい画像を選んでください。JPEG、PNG形式を推奨。">❔</span>
+    <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required>
     </label>
 
     <canvas id="previewCanvas" class="preview"></canvas>
 
-    <h3>画像を回転</h3>
+    <h3>画像を回転
+    <span class="help-icon" title="画像の向きを90度ずつ回転できます。">❔</span>
+    </h3>
+
     <div class="rotate-buttons">
       <button type="button" onclick="rotateImage(-90)" title="左回転">⟲</button>
       <button type="button" onclick="rotateImage(90)" title="右回転">⟳</button>
     </div>
     <input type="hidden" id="rotation" name="rotation" value="0">
 
-    <h3>カラーモードを選択</h3>
+    <h3>カラーモードを選択
+    <span class="help-icon" title="SURIMACCAの製版方法に応じてモードを選択。モノクロ2階調が基本です。">❔</span>
+    </h3>
     <select name="mode" id="modeSelect" onchange="applyPreviewMode()">
       <option value="binary">モノクロ2階調(おすすめ)</option>
       <option value="grayscale">グレースケール</option>
@@ -125,10 +144,13 @@
     </select>
 
     <label>
-      <input type="checkbox" name="trim"> 余白を自動トリミング
+  <input type="checkbox" name="trim"> 余白を自動トリミング
+  <span class="help-icon" title="画像の周囲の白い余白を自動的にカットします。">❔</span>
     </label>
 
-    <h3>サイズを指定(幅・高さのどちらかを入力)</h3>
+    <h3>サイズを指定(幅・高さのどちらかを入力)
+  <span class="help-icon" title="画像の仕上がりサイズをmm単位で入力。片方だけの入力でOKです。">❔</span>
+</h3>
     <div style="display: flex; gap: 1em; align-items: center; flex-wrap: wrap;">
       <label for="width">幅(mm):</label>
       <input type="number" id="width" name="width" step="0.1" style="width: 100px;">
