@@ -17,20 +17,26 @@ def convert():
     mode = request.form['mode']
     width_mm = request.form.get('width', type=float)
     height_mm = request.form.get('height', type=float)
+    rotation = request.form.get('rotation', type=int, default=0)
     dpi = 300  # 固定DPI
     trim = request.form.get('trim') == 'on'
 
-    image = Image.open(image_file.stream).convert('L')  # グレースケール化
+    # グレースケール化
+    image = Image.open(image_file.stream).convert('L')
 
-        # 処理モード
+    # 回転（時計回りに変換されるようにマイナスをつける）
+    if rotation:
+        image = image.rotate(-rotation, expand=True)
+
+    # カラーモードの変更
     if mode == 'binary':
         image = image.point(lambda x: 255 if x > 128 else 0, '1')
     elif mode == 'halftone':
         image = image.convert('1', dither=Image.FLOYDSTEINBERG)
     elif mode == 'grayscale':
-        pass  # 何もしない（すでに .convert('L') でグレースケール化済み）
+        pass  # すでにグレースケールにしてある
 
-    # 余白トリミング（白に近い部分）
+    # 余白トリミング（白に近い部分をカット）
     if trim:
         bg = Image.new('L', image.size, 255)
         diff = ImageChops.difference(image, bg)
@@ -39,31 +45,26 @@ def convert():
         if bbox:
             image = image.crop(bbox)
 
-    # サイズ調整（DPI固定で計算）
+    # サイズ調整（mm → px に変換してリサイズ）
     if width_mm or height_mm:
         orig_w, orig_h = image.size
-
-        # 画像サイズの計算（mm -> px）でDPI=300を固定
         if width_mm and not height_mm:
             width_px = int(width_mm / 25.4 * dpi)
-            height_px = int(orig_h * (width_px / orig_w))  # 縦横比を保つ
+            height_px = int(orig_h * (width_px / orig_w))
         elif height_mm and not width_mm:
             height_px = int(height_mm / 25.4 * dpi)
-            width_px = int(orig_w * (height_px / orig_h))  # 縦横比を保つ
+            width_px = int(orig_w * (height_px / orig_h))
         else:
             width_px = int(width_mm / 25.4 * dpi)
             height_px = int(height_mm / 25.4 * dpi)
 
-        # ここで最大サイズの制限（例えば、最大10000px程度）をかける
-        MAX_SIZE = 10000  # 最大サイズ（ピクセル数）
+        MAX_SIZE = 10000
         width_px = min(width_px, MAX_SIZE)
         height_px = min(height_px, MAX_SIZE)
 
-        # リサイズを行う
         image = image.resize((width_px, height_px), Image.LANCZOS)
 
-
-    # 保存（300dpiで固定）
+    # 保存
     result_path = os.path.join(STATIC_FOLDER, 'output.png')
     image.save(result_path, dpi=(300, 300), optimize=True)
 

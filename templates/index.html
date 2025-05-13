@@ -80,6 +80,25 @@
       border: 1px solid #ddd;
       border-radius: 6px;
     }
+
+    .rotate-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .rotate-buttons button {
+      width: 48%;
+      font-size: 1.5em;
+      background: #eee;
+      color: #333;
+    }
+
+    .rotate-buttons button:hover {
+      background: #ddd;
+    }
   </style>
 </head>
 <body>
@@ -89,7 +108,14 @@
       <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required>
     </label>
 
-    <canvas id="previewCanvas" class="preview"></canvas> <!-- canvas に変更 -->
+    <canvas id="previewCanvas" class="preview"></canvas>
+
+    <h3>画像を回転</h3>
+    <div class="rotate-buttons">
+      <button type="button" onclick="rotateImage(-90)" title="左回転">⟲</button>
+      <button type="button" onclick="rotateImage(90)" title="右回転">⟳</button>
+    </div>
+    <input type="hidden" id="rotation" name="rotation" value="0">
 
     <h3>カラーモードを選択</h3>
     <select name="mode" id="modeSelect" onchange="applyPreviewMode()">
@@ -116,6 +142,7 @@
 
   <script>
     let originalImage = null;
+    let currentRotation = 0;
 
     function previewImage(event) {
       const file = event.target.files[0];
@@ -125,49 +152,79 @@
       reader.onload = function(e) {
         const img = new Image();
         img.onload = function () {
-          const canvas = document.getElementById('previewCanvas');
-          const ctx = canvas.getContext('2d');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-          originalImage = img; // 保持
-          applyPreviewMode();
+          originalImage = img;
+          currentRotation = 0;
+          document.getElementById('rotation').value = 0;
+          renderPreview();
         };
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);
     }
 
-    function applyPreviewMode() {
+    function rotateImage(degrees) {
+      currentRotation = (currentRotation + degrees + 360) % 360;
+      document.getElementById('rotation').value = currentRotation;
+      renderPreview();
+    }
+
+    function renderPreview() {
       if (!originalImage) return;
 
       const canvas = document.getElementById('previewCanvas');
       const ctx = canvas.getContext('2d');
-      canvas.width = originalImage.width;
-      canvas.height = originalImage.height;
-      ctx.drawImage(originalImage, 0, 0);
 
-      const mode = document.getElementById('modeSelect').value;
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
+      const angle = currentRotation * Math.PI / 180;
+      const w = originalImage.width;
+      const h = originalImage.height;
 
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i], g = data[i+1], b = data[i+2];
-        const gray = 0.3 * r + 0.59 * g + 0.11 * b;
-
-        if (mode === 'binary') {
-          const v = gray > 128 ? 255 : 0;
-          data[i] = data[i+1] = data[i+2] = v;
-        } else if (mode === 'halftone') {
-          const threshold = 128 + (Math.random() * 64 - 32);
-          const v = gray > threshold ? 255 : 0;
-          data[i] = data[i+1] = data[i+2] = v;
-        } else {
-          data[i] = data[i+1] = data[i+2] = gray;
-        }
+      let newWidth = w, newHeight = h;
+      if (currentRotation % 180 !== 0) {
+        newWidth = h;
+        newHeight = w;
       }
 
-      ctx.putImageData(imageData, 0, 0);
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+
+      ctx.save();
+      ctx.translate(newWidth / 2, newHeight / 2);
+      ctx.rotate(angle);
+      ctx.drawImage(originalImage, -w / 2, -h / 2);
+      ctx.restore();
+
+      applyPreviewMode();
+    }
+
+    function applyPreviewMode() {
+      const canvas = document.getElementById('previewCanvas');
+      const ctx = canvas.getContext('2d');
+      const mode = document.getElementById('modeSelect').value;
+
+      try {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i], g = data[i + 1], b = data[i + 2];
+          const gray = 0.3 * r + 0.59 * g + 0.11 * b;
+
+          if (mode === 'binary') {
+            const v = gray > 128 ? 255 : 0;
+            data[i] = data[i + 1] = data[i + 2] = v;
+          } else if (mode === 'halftone') {
+            const threshold = 128 + (Math.random() * 64 - 32);
+            const v = gray > threshold ? 255 : 0;
+            data[i] = data[i + 1] = data[i + 2] = v;
+          } else {
+            data[i] = data[i + 1] = data[i + 2] = gray;
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+      } catch (e) {
+        console.warn("Preview mode error:", e);
+      }
     }
   </script>
 </body>
