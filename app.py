@@ -34,7 +34,7 @@ def convert():
     if trim:
         bg = Image.new('L', image.size, 255)
         diff = ImageChops.difference(image, bg)
-        diff = Image.eval(diff, lambda x: 0 if x < 10 else 255)
+        diff = Image.eval(diff, lambda x: 0 if x < 15 else 255)
         bbox = diff.getbbox()
         if bbox:
             image = image.crop(bbox)
