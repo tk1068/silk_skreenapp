@@ -72,14 +72,17 @@
       background: #0056b3;
     }
 
-    canvas.preview {
+   canvas.preview {
       display: block;
       margin: 20px auto 0 auto;
-      max-width: 100%;
-      height: auto;
+      width: 300px;
+      height: 300px;
       border: 1px solid #ddd;
       border-radius: 6px;
+      object-fit: contain; /* 念のため追加 */
+      background-color: #fff; /* 透明対策 */
     }
+
 
     .rotate-buttons {
       display: flex;
@@ -191,32 +194,40 @@
     }
 
     function renderPreview() {
-      if (!originalImage) return;
+  if (!originalImage) return;
 
-      const canvas = document.getElementById('previewCanvas');
-      const ctx = canvas.getContext('2d');
+  const canvas = document.getElementById('previewCanvas');
+  const ctx = canvas.getContext('2d');
 
-      const angle = currentRotation * Math.PI / 180;
-      const w = originalImage.width;
-      const h = originalImage.height;
+  const angle = currentRotation * Math.PI / 180;
+  const w = originalImage.width;
+  const h = originalImage.height;
 
-      let newWidth = w, newHeight = h;
-      if (currentRotation % 180 !== 0) {
-        newWidth = h;
-        newHeight = w;
-      }
+  // 回転後のキャンバスサイズ（内部）
+  let newWidth = w, newHeight = h;
+  if (currentRotation % 180 !== 0) {
+    newWidth = h;
+    newHeight = w;
+  }
 
-      canvas.width = newWidth;
-      canvas.height = newHeight;
+  // キャンバスの内部サイズ（画像描画用）
+  canvas.width = newWidth;
+  canvas.height = newHeight;
 
-      ctx.save();
-      ctx.translate(newWidth / 2, newHeight / 2);
-      ctx.rotate(angle);
-      ctx.drawImage(originalImage, -w / 2, -h / 2);
-      ctx.restore();
+  // 見た目のサイズ（CSS上で正方形に）
+  canvas.style.width = "300px";
+  canvas.style.height = "300px";
 
-      applyPreviewMode();
-    }
+  ctx.save();
+  ctx.translate(newWidth / 2, newHeight / 2);
+  ctx.rotate(angle);
+  ctx.drawImage(originalImage, -w / 2, -h / 2);
+  ctx.restore();
+
+  applyPreviewMode();
+}
+
+
 
     function applyPreviewMode() {
       const canvas = document.getElementById('previewCanvas');
